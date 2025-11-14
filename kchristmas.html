@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kinder Winter Typing Adventure</title>
+  <style>
+    :root {
+      --bg: #f0f7ff;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --ink: #0f172a;
+      --muted: #6b7280;
+      --good: #15803d;
+      --bad: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top, #e0f2fe, #eff6ff 40%, #e5e7eb 100%);
+      color: var(--ink);
+    }
+
+    .game-shell {
+      width: min(900px, 100%);
+      padding: 1.5rem;
+    }
+
+    .game-card {
+      background: var(--card);
+      border-radius: 1.5rem;
+      padding: 1.75rem 1.5rem;
+      box-shadow: 0 14px 40px rgba(15, 23, 42, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    h1 span.emoji {
+      font-size: 1.6em;
+    }
+
+    .stats {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+
+    .pill {
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #1d4ed8;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pill .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .pill strong {
+      font-size: 0.95rem;
+    }
+
+    .subline {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .play-area {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 700px) {
+      .play-area {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .prompt-card {
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prompt-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+    }
+
+    .target-word {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.18);
+      margin: 0.5rem 0 0.75rem;
+    }
+
+    .target-emoji {
+      font-size: 1.7rem;
+    }
+
+    #wordText {
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: lowercase;
+    }
+
+    .level-tag {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #1e3a8a;
+      font-weight: 600;
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 0.3rem;
+      align-items: center;
+      margin-top: 0.25rem;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.4);
+    }
+
+    .dot.active {
+      background: #1d4ed8;
+    }
+
+    .dot.done {
+      background: #22c55e;
+    }
+
+    .input-card {
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    #answerInput {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      font-size: 1.2rem;
+      border-radius: 0.9rem;
+      border: 2px solid #cbd5f5;
+      outline: none;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+    }
+
+    #answerInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    }
+
+    .controls {
+      margin-top: 0.7rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.65rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.16s;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    #checkBtn {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.4);
+    }
+
+    #checkBtn:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    }
+
+    #skipBtn {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    #feedback {
+      min-height: 1.3rem;
+      font-size: 0.9rem;
+      margin-top: 0.35rem;
+      font-weight: 600;
+    }
+
+    #feedback.good {
+      color: var(--good);
+    }
+
+    #feedback.bad {
+      color: var(--bad);
+    }
+
+    .tiny-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+
+    /* Level up banner */
+    .levelup-banner {
+      position: absolute;
+      top: 0.9rem;
+      right: 1rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      font-size: 0.75rem;
+      color: #166534;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .levelup-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Win overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .overlay-card {
+      background: #ffffff;
+      border-radius: 1.8rem;
+      padding: 1.75rem 1.6rem;
+      width: min(500px, 92vw);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 14px 40px rgba(15, 23, 42, 0.5);
+    }
+
+    .overlay-card h2 {
+      margin: 0.2rem 0 0.4rem;
+      font-size: 1.5rem;
+    }
+
+    .overlay-card p {
+      margin: 0.2rem 0;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .big-score {
+      margin: 0.8rem 0 1rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1d4ed8;
+    }
+
+    #playAgainBtn {
+      margin-top: 0.75rem;
+      padding-inline: 1.6rem;
+    }
+
+    /* Emoji confetti */
+    .confetti-piece {
+      position: absolute;
+      font-size: 1.4rem;
+      animation: fall 3.8s linear infinite;
+      pointer-events: none;
+      top: -10%;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-10vh) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) translateX(30px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-shell">
+    <div class="game-card" aria-live="polite">
+      <header>
+        <h1>
+          <span class="emoji">❄️</span>
+          Kinder Winter Typing Adventure
+        </h1>
+        <div class="stats">
+          <div class="pill">
+            <span class="label">Level</span>
+            <strong id="levelLabel">1 • Cozy Words</strong>
+          </div>
+          <div class="pill">
+            <span class="label">Score</span>
+            <strong id="scoreLabel">0</strong>
+          </div>
+        </div>
+      </header>
+
+      <p class="subline" id="missionText">
+        Type the winter word that you see. Earn points, level up, and score big at the Winter Wonder Party!
+      </p>
+
+      <div class="play-area">
+        <section class="prompt-card">
+          <div class="prompt-title">
+            Winter word:
+          </div>
+          <div class="target-word">
+            <span class="target-emoji" id="emojiDisplay">🎄</span>
+            <span id="wordText">hat</span>
+          </div>
+          <div class="level-tag" id="levelTag">
+            Level 1 • Cozy Words
+          </div>
+          <div class="progress-dots" id="progressDots" aria-hidden="true"></div>
+
+          <div class="levelup-banner" id="levelupBanner">
+            ⭐ Level up!
+          </div>
+        </section>
+
+        <section class="input-card">
+          <label for="answerInput">Type the word here:</label>
+          <input id="answerInput" type="text" autocomplete="off" />
+          <div class="controls">
+            <button id="checkBtn" type="button">
+              ✅ Check
+            </button>
+            <button id="skipBtn" type="button">
+              ↪️ New word
+            </button>
+          </div>
+          <p id="feedback"></p>
+          <p class="tiny-note">Tip: Press <strong>Enter</strong> to check your word.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Celebration overlay -->
+  <div class="overlay" id="winOverlay" aria-hidden="true">
+    <div class="overlay-card">
+      <div style="font-size:2.2rem;">🎉❄️🎄</div>
+      <h2>Winter Wonder Winner!</h2>
+      <p>You finished all the levels and scored big!</p>
+      <p class="big-score">Final Score: <span id="finalScore">0</span> points</p>
+      <p>Your typing powered up the whole winter wonderland. Great job, Tech Hero!</p>
+      <button id="playAgainBtn" type="button">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    const levels = [
+      {
+        name: "Level 1 • Cozy Words",
+        mission: "Type short winter words.",
+        emoji: "🧣",
+        words: ["hat", "mug", "elf", "ski", "ice", "sno", "hug"] // simple / short
+      },
+      {
+        name: "Level 2 • Snowy Things",
+        mission: "Keep going with more winter words.",
+        emoji: "❄️",
+        words: ["snow", "sled", "gift", "tree", "star", "bell", "scarf"]
+      },
+      {
+        name: "Level 3 • Holiday Fun",
+        mission: "You’re almost there! Type the festive words.",
+        emoji: "🎄",
+        words: ["cocoa", "santa", "candy", "reind", "toast", "cheer"]
+      }
+    ];
+
+    const pointsPerWord = 10;
+    const wordsPerLevel = 5; // how many words each level uses (max)
+
+    let currentLevelIndex = 0;
+    let currentWordIndex = 0;
+    let score = 0;
+    let usedWords = [];
+
+    const levelLabel = document.getElementById("levelLabel");
+    const scoreLabel = document.getElementById("scoreLabel");
+    const missionText = document.getElementById("missionText");
+    const levelTag = document.getElementById("levelTag");
+    const wordText = document.getElementById("wordText");
+    const emojiDisplay = document.getElementById("emojiDisplay");
+    const progressDots = document.getElementById("progressDots");
+    const feedback = document.getElementById("feedback");
+    const answerInput = document.getElementById("answerInput");
+    const checkBtn = document.getElementById("checkBtn");
+    const skipBtn = document.getElementById("skipBtn");
+    const levelupBanner = document.getElementById("levelupBanner");
+    const winOverlay = document.getElementById("winOverlay");
+    const finalScore = document.getElementById("finalScore");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+
+    function shuffle(array) {
+      const arr = array.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function setupLevel(levelIndex) {
+      const level = levels[levelIndex];
+      usedWords[levelIndex] = shuffle(level.words).slice(0, wordsPerLevel);
+      currentWordIndex = 0;
+
+      levelLabel.textContent = `${levelIndex + 1} • ${level.name.split("•")[1].trim()}`;
+      levelTag.textContent = level.name;
+      missionText.textContent = level.mission + " Level up to reach the Winter Wonder Party!";
+      emojiDisplay.textContent = level.emoji;
+
+      createDots();
+      showWord();
+      showLevelUpBanner();
+    }
+
+    function createDots() {
+      progressDots.innerHTML = "";
+      const total = wordsPerLevel;
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement("div");
+        dot.className = "dot" + (i === 0 ? " active" : "");
+        progressDots.appendChild(dot);
+      }
+    }
+
+    function updateDots(doneCount) {
+      const dots = progressDots.querySelectorAll(".dot");
+      dots.forEach((dot, index) => {
+        dot.classList.remove("active", "done");
+        if (index < doneCount) {
+          dot.classList.add("done");
+        } else if (index === doneCount) {
+          dot.classList.add("active");
+        }
+      });
+    }
+
+    function showWord() {
+      const levelWords = usedWords[currentLevelIndex];
+      const currentWord = levelWords[currentWordIndex];
+      wordText.textContent = currentWord;
+      answerInput.value = "";
+      answerInput.focus();
+      feedback.textContent = "";
+      feedback.className = "";
+      updateDots(currentWordIndex);
+    }
+
+    function normalize(str) {
+      return str.trim().toLowerCase();
+    }
+
+    function handleCorrect() {
+      score += pointsPerWord;
+      scoreLabel.textContent = score;
+      feedback.textContent = "Nice job! 🎉";
+      feedback.className = "good";
+      moveToNextWord();
+    }
+
+    function moveToNextWord() {
+      const levelWords = usedWords[currentLevelIndex];
+      currentWordIndex++;
+      if (currentWordIndex >= levelWords.length) {
+        // finished this level
+        currentLevelIndex++;
+        if (currentLevelIndex >= levels.length) {
+          // game finished!
+          setTimeout(showWinOverlay, 600);
+        } else {
+          setTimeout(() => setupLevel(currentLevelIndex), 600);
+        }
+      } else {
+        setTimeout(showWord, 600);
+      }
+    }
+
+    function checkAnswer() {
+      const typed = normalize(answerInput.value);
+      const target = normalize(wordText.textContent);
+      if (!typed) {
+        feedback.textContent = "Type the word first. 😊";
+        feedback.className = "bad";
+        return;
+      }
+      if (typed === target) {
+        handleCorrect();
+      } else {
+        feedback.textContent = "Close! Try again. ❄️";
+        feedback.className = "bad";
+      }
+    }
+
+    function skipWord() {
+      feedback.textContent = "";
+      feedback.className = "";
+      const levelWords = usedWords[currentLevelIndex];
+      const current = levelWords[currentWordIndex];
+      // move current word to end of list so it will come back later
+      levelWords.push(current);
+      levelWords.splice(currentWordIndex, 1);
+      showWord();
+    }
+
+    function showLevelUpBanner() {
+      levelupBanner.classList.add("show");
+      setTimeout(() => {
+        levelupBanner.classList.remove("show");
+      }, 1500);
+    }
+
+    function createConfetti() {
+      const emojis = ["❄️", "🎄", "🎁", "⭐", "⛄️"];
+      for (let i = 0; i < 45; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        piece.style.left = Math.random() * 100 + "%";
+        piece.style.animationDelay = Math.random() * 1.5 + "s";
+        piece.style.fontSize = (1 + Math.random() * 0.8) + "rem";
+        winOverlay.appendChild(piece);
+      }
+    }
+
+    function showWinOverlay() {
+      finalScore.textContent = score;
+      winOverlay.classList.add("show");
+      winOverlay.setAttribute("aria-hidden", "false");
+      createConfetti();
+    }
+
+    function resetGame() {
+      // remove old confetti
+      const pieces = winOverlay.querySelectorAll(".confetti-piece");
+      pieces.forEach(p => p.remove());
+
+      score = 0;
+      scoreLabel.textContent = score;
+      currentLevelIndex = 0;
+      usedWords = [];
+      winOverlay.classList.remove("show");
+      winOverlay.setAttribute("aria-hidden", "true");
+      setupLevel(0);
+    }
+
+    // Event listeners
+    checkBtn.addEventListener("click", checkAnswer);
+    skipBtn.addEventListener("click", skipWord);
+    playAgainBtn.addEventListener("click", resetGame);
+
+    answerInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        checkAnswer();
+      }
+    });
+
+    // Start game
+    setupLevel(0);
+  </script>
+</body>
+</html>
